@@ -1,32 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 
-function Question({ question, onAnswered }) {
+const Question = ({ question, answers, onAnswered }) => {
   const [timeRemaining, setTimeRemaining] = useState(10);
 
-  // add useEffect code
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      // Decrease timeRemaining by 1 second
+      setTimeRemaining(prevTime => prevTime - 1);
+    }, 1000);
 
-  function handleAnswer(isCorrect) {
-    setTimeRemaining(10);
-    onAnswered(isCorrect);
-  }
+    // Cleanup function for useEffect
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [timeRemaining]); // Add timeRemaining as a dependency
 
-  const { id, prompt, answers, correctIndex } = question;
+  useEffect(() => {
+    // Check if timeRemaining has reached 0
+    if (timeRemaining === 0) {
+      // Reset timeRemaining to 10 seconds
+      setTimeRemaining(10);
+      // Call onAnswered callback with a value of false
+      onAnswered(false);
+    }
+  }, [timeRemaining, onAnswered]); // Add timeRemaining and onAnswered as dependencies
 
   return (
-    <>
-      <h1>Question {id}</h1>
-      <h3>{prompt}</h3>
-      {answers.map((answer, index) => {
-        const isCorrect = index === correctIndex;
-        return (
-          <button key={answer} onClick={() => handleAnswer(isCorrect)}>
-            {answer}
-          </button>
-        );
-      })}
-      <h5>{timeRemaining} seconds remaining</h5>
-    </>
+    <div>
+      <h2>{question && question.prompt}</h2>
+      <ul>
+        {answers && answers.map((answer, index) => (
+          <li key={index}>{answer}</li>
+        ))}
+      </ul>
+      <p>{timeRemaining} seconds remaining</p>
+    </div>
   );
-}
+};
 
 export default Question;
